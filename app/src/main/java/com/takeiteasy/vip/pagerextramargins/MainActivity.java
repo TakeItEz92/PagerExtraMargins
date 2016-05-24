@@ -2,14 +2,19 @@ package com.takeiteasy.vip.pagerextramargins;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.OnApplyWindowInsetsListener;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.WindowInsetsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +32,33 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        final ViewPager pager = (ViewPager) findViewById(R.id.pager);
+
+        ViewCompat.offsetTopAndBottom(pager, 20);
+
+        ViewCompat.setOnApplyWindowInsetsListener(pager, new OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
+                Log.d(TAG, "onApplyWindowInsets: ");
+                Log.d(TAG, "onApplyWindowInsets: stable " + insets.hasStableInsets());
+                Log.d(TAG, "onApplyWindowInsets: system " + insets.hasSystemWindowInsets());
+                Log.d(TAG, "onApplyWindowInsets: system left - " + insets.getSystemWindowInsetLeft());
+                Log.d(TAG, "onApplyWindowInsets: system top - " + insets.getSystemWindowInsetTop());
+                Log.d(TAG, "onApplyWindowInsets: system right - " + insets.getSystemWindowInsetRight());
+                Log.d(TAG, "onApplyWindowInsets: system bottom - " + insets.getSystemWindowInsetBottom());
+                WindowInsetsCompat buf = insets.replaceSystemWindowInsets(
+                        insets.getSystemWindowInsetLeft(),
+                        insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(),
+                        insets.getSystemWindowInsetBottom() + insets.getSystemWindowInsetTop());
+                Log.d(TAG, "onApplyWindowInsets: system bottom - " + buf.getSystemWindowInsetBottom());
+
+                CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) pager.getLayoutParams();
+                lp.setMargins(0, 0, 0, insets.getSystemWindowInsetTop());
+                pager.setLayoutParams(lp);
+                return insets;
+            }
+        });
 
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
     }
